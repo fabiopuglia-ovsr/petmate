@@ -74,7 +74,15 @@ jobs:
         with:
           python-version: "3.11"      # same as Raspberry Pi OS Bookworm
       - run: pip install -r requirements-mvp.txt pytest
-      - run: python -m pytest -q
+      - name: Tests
+        shell: bash
+        run: |
+          set +e
+          python -m pytest -q -rfE --tb=line 2>&1 | tee pytest.out
+          rc=${PIPESTATUS[0]}
+          # surface failures as annotations (job logs are not always reachable)
+          grep -E "^(FAILED|ERROR) |Error:|error:" pytest.out | head -10 | sed 's/^/::error::/'
+          exit $rc
 
   cloud:
     name: Cloud — tests
