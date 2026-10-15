@@ -39,7 +39,7 @@ jobs:
       - name: Generate platform scaffolding (keeps our lib/, test/, manifest)
         run: |
           flutter --version
-          flutter create . --org com.oversonic --project-name petmate --platforms android,ios
+          flutter create . --org com.oversonic --project-name petmate --platforms android
           git diff --exit-code -- lib test pubspec.yaml android/app/src/main/AndroidManifest.xml \
             || (echo "::error::flutter create modified tracked files"; exit 1)
       - run: flutter pub get

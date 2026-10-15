@@ -17,7 +17,7 @@ app/build/
 app/.flutter-plugins
 app/.flutter-plugins-dependencies
 app/.packages
-app/ios/
+app/ios/   # Android-only build; iOS scaffolding not generated
 app/android/*
 !app/android/app/
 app/android/app/*
