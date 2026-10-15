@@ -1,0 +1,9 @@
+uint8 STOP=0
+uint8 WIGGLE=1
+uint8 SWEEP=2
+uint8 RANDOM=3
+uint8 pattern
+uint16 duration_ms
+---
+bool success
+string message

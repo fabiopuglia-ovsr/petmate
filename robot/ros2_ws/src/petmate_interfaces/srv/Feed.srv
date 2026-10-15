@@ -1,0 +1,4 @@
+float32 grams      # 1..60 (clamped to portion_max_g by caller)
+---
+bool success
+string message

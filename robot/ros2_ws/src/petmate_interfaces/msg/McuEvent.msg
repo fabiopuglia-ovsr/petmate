@@ -1,0 +1,19 @@
+# MCU EVENT (0x84); codes per INTERFACES.md §2
+uint8 CLIFF=1
+uint8 BUMP=2
+uint8 WHEEL_DROP=3
+uint8 MOTOR_FAULT=4
+uint8 BUTTON_SHORT=5
+uint8 BUTTON_LONG=6
+uint8 BUTTON_PROVISION=7
+uint8 DOCK_CONTACT=8
+uint8 UNDOCK=9
+uint8 BATTERY_LOW=10
+uint8 BATTERY_CRITICAL=11
+uint8 FEEDER_JAM=12
+uint8 HOPPER_LOW=13
+uint8 WATCHDOG=14
+std_msgs/Header header
+uint8 code
+string name
+uint16 data

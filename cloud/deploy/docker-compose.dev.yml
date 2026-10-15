@@ -1,0 +1,54 @@
+# Petmate cloud — developer run (docs/MVP.md). From cloud/deploy:
+#
+#   LAN_HOSTS=192.168.1.50 docker compose -f docker-compose.dev.yml up --build
+#
+# LAN_HOSTS = this PC's LAN IP: a container cannot detect it, and it is what
+# /v1/server-info proposes as cloud_url to the BLE wizard. Console: http://localhost:8000/console/
+#
+# Remote tests with TURN (optional, see README "TURN per test da remoto"):
+#   TURN_EXTERNAL_IP=<public ip> TURN_URLS="turn:<public ip or ddns>:3478?transport=udp,turn:<public ip or ddns>:3478?transport=tcp" \
+#   LAN_HOSTS=192.168.1.50 docker compose -f docker-compose.dev.yml --profile turn up --build
+name: petmate-dev
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    env_file: dev.env
+    environment:
+      LAN_HOSTS: ${LAN_HOSTS:-}
+      TURN_URLS: ${TURN_URLS:-}
+      TURN_SECRET: ${TURN_SECRET:-petmate-dev-turn-secret}
+      STUN_URLS: ${STUN_URLS:-stun:stun.l.google.com:19302}
+    ports:
+      - "0.0.0.0:8000:8000"
+    volumes:
+      - dev-data:/data          # SQLite (petmate.db) + clips
+    # no proxy in front: drop --proxy-headers of the production CMD
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000",
+              "--ws-ping-interval", "20", "--ws-ping-timeout", "20"]
+    restart: unless-stopped
+
+  coturn:
+    profiles: ["turn"]
+    image: coturn/coturn:4.6
+    ports:
+      - "3478:3478/udp"
+      - "3478:3478/tcp"
+      - "49160-49200:49160-49200/udp"
+    volumes:
+      - ./coturn/turnserver.dev.conf:/etc/coturn/turnserver.conf:ro
+    environment:
+      TURN_SECRET: ${TURN_SECRET:-petmate-dev-turn-secret}
+      TURN_EXTERNAL_IP: ${TURN_EXTERNAL_IP:-}
+    entrypoint: ["sh", "-c"]
+    command:
+      - >-
+        [ -n "$$TURN_EXTERNAL_IP" ] || { echo "TURN_EXTERNAL_IP non impostato (IP pubblico del router)"; exit 1; };
+        exec turnserver -c /etc/coturn/turnserver.conf
+        --static-auth-secret="$$TURN_SECRET" --realm=petmate.dev --external-ip="$$TURN_EXTERNAL_IP"
+    restart: unless-stopped
+
+volumes:
+  dev-data:

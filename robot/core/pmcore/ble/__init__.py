@@ -1,0 +1,7 @@
+"""BLE provisioning (INTERFACES.md §7)."""
+
+SERVICE_UUID = "8f1d0000-5e7a-4c3a-9d8e-7e7f1a2b3c4d"
+CHAR_DEVICE_INFO = "8f1d0001-5e7a-4c3a-9d8e-7e7f1a2b3c4d"
+CHAR_WIFI_SCAN = "8f1d0002-5e7a-4c3a-9d8e-7e7f1a2b3c4d"
+CHAR_PAYLOAD = "8f1d0003-5e7a-4c3a-9d8e-7e7f1a2b3c4d"
+CHAR_STATUS = "8f1d0004-5e7a-4c3a-9d8e-7e7f1a2b3c4d"

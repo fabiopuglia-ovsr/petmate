@@ -1,0 +1,30 @@
+# twist_mux priorities (higher wins): safety stop > teleop > docking/behavior > nav
+# Output: /cmd_vel (geometry_msgs/Twist) -> petmate_base.
+# NOTE Jazzy: twist_mux >= 4.4 supports TwistStamped via `use_stamped`; we pin
+# it to false here so the whole chain uses Twist. If your twist_mux build
+# ignores it and outputs TwistStamped, set petmate_base `cmd_vel_stamped: true`.
+twist_mux:
+  ros__parameters:
+    use_stamped: false
+    topics:
+      navigation:
+        topic: cmd_vel_nav
+        timeout: 0.5
+        priority: 10
+      docking:                      # petmate_behavior direct motion (dock reverse, seek_pet, play)
+        topic: cmd_vel_docking
+        timeout: 0.5
+        priority: 50
+      teleop:                       # petmate_bridge, 300 ms deadman upstream
+        topic: cmd_vel_teleop
+        timeout: 0.35
+        priority: 100
+      safety:                       # reserved: collision monitor / cliff reflex (stop commands)
+        topic: cmd_vel_safety
+        timeout: 0.3
+        priority: 200
+    locks:
+      safety_stop:                  # petmate_behavior: estop / wheel_drop / motor_fault
+        topic: petmate/safety_lock
+        timeout: 0.0
+        priority: 255

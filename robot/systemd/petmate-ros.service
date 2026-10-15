@@ -1,0 +1,25 @@
+[Unit]
+Description=Petmate ROS 2 stack (docker compose)
+Documentation=file:///opt/petmate/docs/INTERFACES.md
+Requires=docker.service
+After=docker.service network-online.target dev-petmate_mcu.device
+Wants=network-online.target dev-petmate_mcu.device
+# pm-core binds 5560; the bridge reconnects on its own, so no hard dependency.
+After=petmate-core.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/petmate/robot/docker
+EnvironmentFile=-/etc/petmate/ros.env
+ExecStartPre=/usr/bin/mkdir -p /var/lib/petmate/maps
+# compose.sh picks `docker compose` (v2) or `docker-compose` (v1, Bookworm package)
+ExecStartPre=-/opt/petmate/robot/docker/compose.sh down --remove-orphans
+ExecStart=/opt/petmate/robot/docker/compose.sh up --no-build --abort-on-container-exit
+ExecStop=/opt/petmate/robot/docker/compose.sh down --timeout 15
+Restart=always
+RestartSec=5
+TimeoutStartSec=180
+TimeoutStopSec=45
+
+[Install]
+WantedBy=multi-user.target

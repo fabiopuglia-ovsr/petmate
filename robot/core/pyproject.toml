@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pmcore"
+version = "0.1.0"
+description = "Petmate host service (pm-core) for Raspberry Pi 5 + AI HAT+"
+requires-python = ">=3.11"
+readme = { text = "See docs/INTERFACES.md", content-type = "text/plain" }
+dependencies = [
+  "aiortc>=1.9,<2",
+  "aioice>=0.9",
+  "av>=12",
+  "aiohttp>=3.9,<4",
+  "pyzmq>=25",
+  "numpy>=1.24",
+  "cryptography>=41",
+]
+
+[project.optional-dependencies]
+# Pi-only extras. picamera2 and the Hailo runtime come from apt
+# (python3-picamera2, hailo-all) and are reached via --system-site-packages.
+robot = ["pygame>=2.5", "bless>=0.2.6"]
+# docs/MVP.md profile (Pi 5 + USB webcam, no display): see requirements-mvp.txt
+mvp = ["bless>=0.2.6,<0.4"]
+dev = ["pytest>=7", "pygame>=2.5"]
+
+[project.scripts]
+pm-core = "pmcore.main:main"
+petmate-doctor = "pmcore.doctor:main"
+
+[tool.setuptools.packages.find]
+include = ["pmcore*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

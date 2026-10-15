@@ -1,0 +1,24 @@
+{
+	email {$ACME_EMAIL}
+}
+
+{$API_DOMAIN} {
+	encode gzip
+	# WebSocket upgrade for /v1/signal is handled transparently by reverse_proxy.
+	reverse_proxy api:8000 {
+		header_up X-Forwarded-For {remote_host}
+		flush_interval -1
+	}
+	request_body {
+		max_size 110MB
+	}
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+}
+
+# Obtains a certificate for the TURN hostname too (reusable for coturn TURNS, see README).
+{$TURN_HOST} {
+	respond "ok" 200
+}

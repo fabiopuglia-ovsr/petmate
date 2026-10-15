@@ -1,0 +1,16 @@
+# 3D cloud -> 2D scan for slam_toolbox / costmaps. Slice z 0.05..0.40 m in base_link.
+pointcloud_to_laserscan:
+  ros__parameters:
+    target_frame: base_link
+    transform_tolerance: 0.05
+    min_height: 0.05
+    max_height: 0.40
+    angle_min: -3.14159
+    angle_max: 3.14159
+    angle_increment: 0.00872665   # 0.5 deg
+    scan_time: 0.18               # L2 ~5.5 Hz circumferential scan
+    range_min: 0.20               # > body radius (0.17 m): rejects self-returns
+    range_max: 12.0
+    use_inf: true
+    inf_epsilon: 1.0
+    queue_size: 5

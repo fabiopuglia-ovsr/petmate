@@ -1,0 +1,5 @@
+uint8 power_pct    # clamped 20..70
+uint8 count        # 1..4
+---
+bool success
+string message

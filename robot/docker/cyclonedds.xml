@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Keep DDS traffic on loopback: the robot's ROS graph is local-only
+     (pm-core talks to ROS over ZeroMQ, §3). Avoids flooding Wi-Fi and the
+     dedicated LiDAR Ethernet with discovery multicast. -->
+<CycloneDDS xmlns="https://cdds.io/config">
+  <Domain id="any">
+    <General>
+      <Interfaces>
+        <NetworkInterface name="lo" multicast="true"/>
+      </Interfaces>
+      <AllowMulticast>true</AllowMulticast>
+    </General>
+  </Domain>
+</CycloneDDS>

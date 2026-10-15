@@ -1,0 +1,12 @@
+# pm-core dependencies for the MVP profile (docs/MVP.md): Raspberry Pi 5, Bookworm 64-bit,
+# Python 3.11, USB webcam. All available as aarch64/cp311 binary wheels on PyPI
+# (PyAV's wheel bundles FFmpeg incl. libx264 + MJPEG decoder + v4l2/lavfi devices).
+# Installed by robot/scripts/install_mvp.sh into /opt/petmate/venv (--system-site-packages).
+aiortc>=1.9,<2
+aioice>=0.9          # >=0.7 resolves Chrome "<uuid>.local" mDNS host candidates itself
+av>=12
+aiohttp>=3.9,<4
+pyzmq>=25            # imported lazily; unused with zmq.enabled=false but kept for parity
+numpy>=1.24
+cryptography>=41
+bless>=0.2.6,<0.4    # BLE GATT server (BlueZ D-Bus)

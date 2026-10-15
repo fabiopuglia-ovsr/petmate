@@ -1,0 +1,3 @@
+# Petmate MCU (RP2350 / Pico 2, USB CDC, VID 0x2E8A) -> /dev/petmate_mcu  (INTERFACES.md §2)
+# Restrict by product/serial if other RP2xxx devices may be attached.
+SUBSYSTEM=="tty", ATTRS{idVendor}=="2e8a", SYMLINK+="petmate_mcu", MODE="0660", GROUP="dialout", TAG+="systemd"

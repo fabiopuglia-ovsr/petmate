@@ -1,0 +1,50 @@
+# Run from cloud/deploy:   cp .env.example .env && edit && docker compose up -d --build
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    env_file: .env
+    environment:
+      TURN_HOST: ${TURN_HOST}
+    volumes:
+      - api-data:/data
+      # - ./fcm-service-account.json:/run/secrets/fcm.json:ro
+    restart: unless-stopped
+    expose: ["8000"]
+
+  caddy:
+    image: caddy:2
+    depends_on: [api]
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      API_DOMAIN: ${API_DOMAIN}
+      TURN_HOST: ${TURN_HOST}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    restart: unless-stopped
+
+  coturn:
+    image: coturn/coturn:4.6
+    # host networking: TURN relays a large UDP port range; NAT mapping via external-ip
+    network_mode: host
+    volumes:
+      - ./coturn/turnserver.conf:/etc/coturn/turnserver.conf:ro
+      # TLS certs for TURNS (e.g. copied from caddy-data, or certbot). See README.
+      - ./coturn/certs:/etc/coturn/certs:ro
+    command: ["-c", "/etc/coturn/turnserver.conf",
+              "--static-auth-secret=${TURN_SECRET}",
+              "--realm=${TURN_REALM}",
+              "--external-ip=${TURN_EXTERNAL_IP}"]
+    restart: unless-stopped
+
+volumes:
+  api-data:
+  caddy-data:
+  caddy-config:

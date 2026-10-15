@@ -1,0 +1,38 @@
+services:
+  ros:
+    image: petmate/ros:0.1
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ros
+    container_name: petmate-ros
+    network_mode: host            # ZeroMQ 127.0.0.1:5560/5561 with pm-core, LiDAR UDP on eth0
+    ipc: host                     # DDS shared memory between ROS nodes
+    privileged: false
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 15s
+    devices:
+      - /dev/petmate_mcu:/dev/petmate_mcu
+      - /dev/bus/usb:/dev/bus/usb
+    group_add:
+      - dialout
+    # USB CDC re-enumeration after MCU reset: allow ttyACM (major 166) + USB (189)
+    device_cgroup_rules:
+      - 'c 166:* rmw'
+      - 'c 189:* rmw'
+    volumes:
+      - /var/lib/petmate:/var/lib/petmate
+      - /dev/serial:/dev/serial:ro
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-42}
+    command: >
+      ros2 launch petmate_bringup bringup.launch.py
+      lidar:=${PETMATE_LIDAR:-l2}
+      mode:=${PETMATE_SLAM_MODE:-localization}
+      map:=/var/lib/petmate/maps/home
+      controller:=${PETMATE_CONTROLLER:-mppi}
+    logging:
+      driver: journald
+      options:
+        tag: petmate-ros

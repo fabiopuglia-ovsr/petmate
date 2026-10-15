@@ -1,0 +1,38 @@
+[Unit]
+Description=Petmate pm-core host service (cameras, Hailo, WebRTC, display, BLE provisioning)
+Documentation=file:///opt/petmate/docs/INTERFACES.md
+After=network.target NetworkManager.service bluetooth.service
+Wants=NetworkManager.service bluetooth.service
+# ROS stack is independent: ZeroMQ reconnects either way.
+
+[Service]
+Type=simple
+User=petmate
+Group=petmate
+SupplementaryGroups=video render audio input bluetooth netdev
+WorkingDirectory=/opt/petmate/core
+Environment=PYTHONUNBUFFERED=1
+Environment=SDL_VIDEODRIVER=kmsdrm
+Environment=SDL_AUDIODRIVER=dummy
+Environment=SDL_NOMOUSE=1
+Environment=LIBCAMERA_LOG_LEVELS=*:WARN
+ExecStart=/opt/petmate/venv/bin/python -m pmcore
+Restart=always
+RestartSec=3
+TimeoutStopSec=15
+KillSignal=SIGTERM
+# realtime-ish priority for media threads
+Nice=-5
+LimitRTPRIO=20
+# state
+StateDirectory=petmate
+StateDirectoryMode=0750
+ConfigurationDirectory=petmate
+# hardening (devices needed: /dev/video*, /dev/media*, /dev/dma_heap, /dev/hailo0, /dev/dri, /dev/snd)
+NoNewPrivileges=yes
+ProtectSystem=full
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

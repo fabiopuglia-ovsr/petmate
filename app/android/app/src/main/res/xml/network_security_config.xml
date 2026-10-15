@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  PROTOTYPE / MVP ONLY: cleartext HTTP and WS are permitted for every host so the
+  app can reach the cloud running on the developer laptop (http://<ip-pc>:8000/v1),
+  whose LAN IP is not known at build time. Applies to debug, profile AND release.
+  Before shipping: remove cleartextTrafficPermitted from base-config (or move it
+  into <debug-overrides>) and set android:usesCleartextTraffic="false".
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

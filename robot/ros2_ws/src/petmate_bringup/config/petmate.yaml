@@ -1,0 +1,36 @@
+petmate_base:
+  ros__parameters:
+    port: /dev/petmate_mcu
+    publish_tf: false
+    odom_source: mcu
+    cmd_vel_stamped: false
+    cmd_rate_hz: 20.0
+    cmd_timeout_s: 0.5
+    ticks_per_rev: 1320.0
+    wheel_radius_m: 0.036
+    track_m: 0.260
+    v_max: 0.50
+    w_max: 2.0
+    a_max: 0.6
+
+petmate_bridge:
+  ros__parameters:
+    sub_endpoint: tcp://127.0.0.1:5560
+    pub_endpoint: tcp://127.0.0.1:5561
+    state_rate_hz: 2.0
+    teleop_deadman_s: 0.30
+
+petmate_behavior:
+  ros__parameters:
+    config_path: /var/lib/petmate/config.json
+    pois_path: /var/lib/petmate/pois.yaml
+    state_path: /var/lib/petmate/behavior_state.json
+    map_base: /var/lib/petmate/maps/home
+    initial_mode: auto
+    predock_dist: 0.45
+    dock_reverse_speed: 0.05
+    dock_retries: 2
+    battery_low_soc: 20
+    seek_target_dist: 0.80
+    seek_v_max: 0.25
+    use_opennav_docking: false

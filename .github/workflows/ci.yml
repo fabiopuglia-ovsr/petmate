@@ -1,0 +1,130 @@
+name: CI
+
+# Builds and tests every component. The Android APK of the app is attached to each run
+# (Actions → run → Artifacts → petmate-android-apk).
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      api_url:
+        description: "Default server URL baked into the APK (e.g. http://192.168.1.50:8000/v1). Editable in the app anyway."
+        required: false
+        default: ""
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  app-android:
+    name: App Flutter — analyze, test, APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: "3.38.x"   # ≥ 3.35 needed by go_router 17; 3.44 (AGP 9) may reject flutter_blue_plus
+          cache: true
+      - name: Generate platform scaffolding (keeps our lib/, test/, manifest)
+        run: |
+          flutter --version
+          flutter create . --org com.oversonic --project-name petmate --platforms android,ios
+          git diff --exit-code -- lib test pubspec.yaml android/app/src/main/AndroidManifest.xml \
+            || (echo "::error::flutter create modified tracked files"; exit 1)
+      - run: flutter pub get
+      - name: Analyze (errors fail the build)
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+      - name: Unit tests
+        run: flutter test
+      - name: Build APK
+        env:
+          API_URL: ${{ github.event.inputs.api_url }}
+        run: |
+          flutter build apk --release \
+            --dart-define=PETMATE_MVP=true \
+            --dart-define=PETMATE_API="${API_URL}"
+          cp build/app/outputs/flutter-apk/app-release.apk build/petmate-${GITHUB_SHA::7}.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: petmate-android-apk
+          path: app/build/petmate-*.apk
+          retention-days: 30
+
+  robot-core:
+    name: pm-core (Raspberry Pi service) — tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: robot/core
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"      # same as Raspberry Pi OS Bookworm
+      - run: pip install -r requirements-mvp.txt pytest
+      - run: python -m pytest -q
+
+  cloud:
+    name: Cloud — tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: cloud
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements-dev.txt
+      - run: python -m pytest -q --ignore=tests/test_console_browser.py
+
+  ros2-unit:
+    name: ROS 2 packages — pure-Python unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: robot/ros2_ws/src
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"      # ROS 2 Jazzy / Ubuntu 24.04
+      - run: pip install pytest pyyaml
+      - run: python -m pytest -q petmate_base petmate_bridge petmate_behavior
+
+  firmware:
+    name: Firmware RP2350 — host tests + UF2
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: sudo apt-get update && sudo apt-get install -y gcc-arm-none-eabi libnewlib-arm-none-eabi cmake ninja-build
+      - name: Host unit tests
+        working-directory: firmware
+        run: cmake -S test -B build-test && cmake --build build-test && ctest --test-dir build-test --output-on-failure
+      - name: Pico SDK 2.1.1
+        run: git clone --depth 1 --branch 2.1.1 --recurse-submodules --shallow-submodules https://github.com/raspberrypi/pico-sdk.git "$RUNNER_TEMP/pico-sdk"
+      - name: Build UF2
+        working-directory: firmware
+        env:
+          PICO_SDK_PATH: ${{ runner.temp }}/pico-sdk
+        run: cmake -S . -B build -G Ninja -DPICO_BOARD=pico2 && cmake --build build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: petmate-firmware-uf2
+          path: firmware/build/*.uf2

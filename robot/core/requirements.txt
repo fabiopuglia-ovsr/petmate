@@ -1,0 +1,17 @@
+# pm-core Python dependencies (pip, inside a venv created with --system-site-packages)
+aiortc>=1.9,<2
+av>=12
+aiohttp>=3.9,<4
+pyzmq>=25
+numpy>=1.24
+cryptography>=41
+pygame>=2.5
+bless>=0.2.6
+#
+# From apt, NOT pip (need libcamera / HailoRT system bindings):
+#   picamera2      -> sudo apt install python3-picamera2   (provides picamera2.devices.Hailo)
+#   Hailo runtime  -> sudo apt install hailo-all            (hailort, python3-hailort, /usr/share/hailo-models/*.hef)
+# The venv MUST be created with --system-site-packages so these are importable.
+#
+# Test-only:
+#   pytest>=7

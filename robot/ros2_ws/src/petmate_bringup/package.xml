@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>petmate_bringup</name>
+  <version>0.1.0</version>
+  <description>Launch files and configuration for the Petmate robot.</description>
+  <maintainer email="dev@petmate.example">Petmate team</maintainer>
+  <license>Proprietary</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>petmate_description</exec_depend>
+  <exec_depend>petmate_base</exec_depend>
+  <exec_depend>petmate_bridge</exec_depend>
+  <exec_depend>petmate_behavior</exec_depend>
+  <exec_depend>robot_localization</exec_depend>
+  <exec_depend>twist_mux</exec_depend>
+  <exec_depend>pointcloud_to_laserscan</exec_depend>
+  <exec_depend>slam_toolbox</exec_depend>
+  <exec_depend>nav2_common</exec_depend>
+  <exec_depend>nav2_controller</exec_depend>
+  <exec_depend>nav2_planner</exec_depend>
+  <exec_depend>nav2_smoother</exec_depend>
+  <exec_depend>nav2_behaviors</exec_depend>
+  <exec_depend>nav2_bt_navigator</exec_depend>
+  <exec_depend>nav2_velocity_smoother</exec_depend>
+  <exec_depend>nav2_lifecycle_manager</exec_depend>
+  <exec_depend>nav2_mppi_controller</exec_depend>
+  <exec_depend>nav2_regulated_pure_pursuit_controller</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <!-- LiDAR drivers are built from source in the Docker image (not rosdep-resolvable):
+       unitree_lidar_ros2 (unilidar_sdk2), livox_ros_driver2 (+ Livox-SDK2) -->
+  <export><build_type>ament_cmake</build_type></export>
+</package>

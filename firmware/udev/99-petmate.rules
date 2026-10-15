@@ -1,0 +1,5 @@
+# Petmate MCU (RP2350 / Pico 2, TinyUSB CDC-ACM) -> /dev/petmate_mcu
+# Spec: docs/INTERFACES.md §2 (VID 0x2E8A).
+# The product string is matched too, so other Raspberry Pi USB devices
+# (e.g. a debug probe on VID 0x2E8A) do not grab the symlink.
+SUBSYSTEM=="tty", ATTRS{idVendor}=="2e8a", ATTRS{product}=="Petmate MCU", SYMLINK+="petmate_mcu", MODE="0660", GROUP="dialout", ENV{ID_MM_DEVICE_IGNORE}="1"
