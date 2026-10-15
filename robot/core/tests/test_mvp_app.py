@@ -214,7 +214,11 @@ def test_mdns_host_candidates_are_resolved(tmp_path):
                 await responder.publish(names[ip], ip)
                 sdp = re.sub(rf"(a=candidate:\S+ \d+ udp \d+ ){re.escape(ip)}( \d+ typ host)",
                              rf"\g<1>{names[ip]}\g<2>", sdp)
-            assert ".local" in sdp and not any(f" {ip} " in sdp for ip in ips)
+            # Only host candidates are obfuscated (as Chrome does). With internet access
+            # aiortc also gathers srflx candidates whose "raddr" still carries the
+            # private IP (e.g. on CI runners) — Chrome sends raddr 0.0.0.0 there.
+            host_lines = [l for l in sdp.splitlines() if l.startswith("a=candidate:") and " typ host" in l]
+            assert ".local" in sdp and not any(f" {ip} " in l for l in host_lines for ip in ips)
             answer = await app.webrtc.on_offer("user:1:mdns", sdp)
             sess = app.webrtc.sessions["user:1:mdns"]
             ice = sess.pc.getTransceivers()[0].receiver.transport.transport
